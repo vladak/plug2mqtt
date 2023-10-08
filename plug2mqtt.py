@@ -149,14 +149,20 @@ def main():
                 logger.debug(f"device info: {p110.getDeviceInfo()}")
                 device_on = p110.getDeviceInfo()["result"]["device_on"]
                 logger.debug(f"device_on = {device_on}")
-	    # pylint: disable=broad-exception-caught
+
+                energy_usage_dict = p110.getEnergyUsage()
+                logger.debug(f"Got energy usage dictionary: {energy_usage_dict}")
+                current_power = energy_usage_dict.get("result").get("current_power")
+            # pylint: disable=broad-exception-caught
             except Exception as e:
                 logger.error(f"Cannot get device state: {e}")
                 continue
 
-            # send the state to MQTT broker
+            # send the data to MQTT broker
             logger.info("Publishing to MQTT broker")
-            mqtt.publish(plug["topic"], json.dumps({"on": device_on}))
+            mqtt.publish(plug["topic"],
+                         json.dumps({"on": device_on,
+                                     "current_power": current_power}))
 
         logger.debug(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)
