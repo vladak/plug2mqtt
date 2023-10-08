@@ -164,7 +164,7 @@ def main():
             logger.info("Publishing to MQTT broker")
             mqtt.publish(plug["topic"],
                          json.dumps({"on": device_on,
-                                     "current_power": current_power}))
+                                     "current_power": current_power / 1000}))
 
         logger.debug(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)
