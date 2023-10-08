@@ -84,12 +84,12 @@ def config_check(plugs):
             sys.exit(1)
 
     hostnames = (plug["hostname"] for plug in plugs)
-    if len(hostnames) != len(plugs):
+    if len(list(hostnames)) != len(plugs):
         logger.error("duplicate hostnames in configuration")
         sys.exit(1)
 
-    hostnames = (plug["topic"] for plug in plugs)
-    if len(hostnames) != len(plugs):
+    topics = (plug["topic"] for plug in plugs)
+    if len(list(topics)) != len(plugs):
         logger.error("duplicate topics in configuration")
         sys.exit(1)
 
