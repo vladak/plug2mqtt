@@ -1,0 +1,16 @@
+[Unit]
+Description=Plug2MQTT Service
+
+[Service]
+User=pi
+Group=pi
+Type=simple
+WorkingDirectory=/srv/plug2mqtt
+ExecStart=/srv/weather/venv/bin/python3 /srv/plug2mqtt/plug2mqtt.py
+ExecStop=/bin/kill -2 $MAINPID
+TimeoutStartSec=0
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
