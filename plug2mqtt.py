@@ -127,7 +127,7 @@ def main():
     # connect to MQTT broker
     mqtt = MQTT.MQTT(
         broker=args.hostname,
-  	    port=args.port,
+        port=args.port,
         socket_pool=socket,
         ssl_context=ssl.create_default_context(),
     )
@@ -146,14 +146,14 @@ def main():
                 p110.handshake()
                 p110.login()
                 logger.info("Connected to the plug")
-        
+
                 logger.debug(f"device info: {p110.getDeviceInfo()}")
                 device_on = p110.getDeviceInfo()["result"]["device_on"]
                 logger.debug(f"device_on = {device_on}")
             except Exception as e:
                 logger.error(f"Cannot get device state: {e}")
                 continue
-        
+
             # send the state to MQTT broker
             logger.debug("Publishing to MQTT broker")
             mqtt.publish(plug["topic"], json.dumps({"on": device_on}))
@@ -167,4 +167,3 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         sys.exit(0)
-
