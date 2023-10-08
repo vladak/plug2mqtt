@@ -13,7 +13,6 @@ import sys
 import ssl
 import socket
 import time
-from datetime import datetime
 
 from PyP100 import PyP110
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
@@ -84,12 +83,12 @@ def config_check(plugs):
             logger.error("missing topic")
             sys.exit(1)
 
-    hostnames = set([plug["hostname"] for plug in plugs])
+    hostnames = (plug["hostname"] for plug in plugs)
     if len(hostnames) != len(plugs):
         logger.error("duplicate hostnames in configuration")
         sys.exit(1)
 
-    hostnames = set([plug["topic"] for plug in plugs])
+    hostnames = (plug["topic"] for plug in plugs)
     if len(hostnames) != len(plugs):
         logger.error("duplicate topics in configuration")
         sys.exit(1)
@@ -113,7 +112,7 @@ def main():
         logger.setLevel(config_log_level)
 
     # load config from file
-    with open(args.config) as config_fp:
+    with open(args.config, encoding="UTF-8") as config_fp:
         try:
             plugs = json.load(config_fp)
             # The output of this statement will contain passwords, so leave it out:
@@ -150,6 +149,7 @@ def main():
                 logger.debug(f"device info: {p110.getDeviceInfo()}")
                 device_on = p110.getDeviceInfo()["result"]["device_on"]
                 logger.debug(f"device_on = {device_on}")
+	    # pylint: disable=broad-exception-caught
             except Exception as e:
                 logger.error(f"Cannot get device state: {e}")
                 continue
