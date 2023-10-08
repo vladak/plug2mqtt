@@ -23,3 +23,23 @@ Publish smart plug state to MQTT. Specifically and currently this works for P110
   sudo systemctl start plug2mqtt
   systemctl status plug2mqtt
 ```
+
+## Setup
+
+The `plugs.json` configuration file should look like this:
+```json
+[
+	{
+	  "topic": "devices/plug/kitchen",
+	  "username": "foo@bar",
+    "password": "Changeme",
+    "hostname": "foo.iot"
+	},
+  {
+	  "topic": "devices/plug/cellar",
+	  "username": "foo@bar",
+    "password": "Changeme",
+    "hostname": "bar.iot"
+	},
+]
+```
