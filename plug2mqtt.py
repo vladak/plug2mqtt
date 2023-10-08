@@ -155,7 +155,7 @@ def main():
                 continue
 
             # send the state to MQTT broker
-            logger.debug("Publishing to MQTT broker")
+            logger.info("Publishing to MQTT broker")
             mqtt.publish(plug["topic"], json.dumps({"on": device_on}))
 
         logger.debug(f"Sleeping for {args.sleep} seconds")
