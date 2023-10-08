@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# pylint: disable=logging-fstring-interpolation
+
 """
 Gather state of P110 plugs specified in configuration file
 and publish it to MQTT topics.
