@@ -8,6 +8,7 @@ and publish it to MQTT topics.
 """
 
 import argparse
+import base64
 import json
 import logging
 import os
@@ -156,8 +157,14 @@ def main():
                 logger.info("Connected to the plug")
 
                 logger.debug(f"device info: {p110.getDeviceInfo()}")
-                device_on = p110.getDeviceInfo()["result"]["device_on"]
+                result = p110.getDeviceInfo()["result"]
+                device_on = result["device_on"]
                 logger.debug(f"device_on = {device_on}")
+
+                try:
+                    nickname = result["nickname"]
+                except KeyError:
+                    nickname = None
 
                 energy_usage_dict = p110.getEnergyUsage()
                 logger.debug(f"Got energy usage dictionary: {energy_usage_dict}")
@@ -167,12 +174,13 @@ def main():
                 logger.error(f"Cannot get device state: {e}")
                 continue
 
+            data = {"on": device_on, "current_power": current_power / 1000}
+            if nickname:
+                data["nickname"] = base64.b64decode(nickname).decode("utf-8")
+
             # send the data to MQTT broker
             logger.info("Publishing to MQTT broker")
-            mqtt.publish(
-                plug["topic"],
-                json.dumps({"on": device_on, "current_power": current_power / 1000}),
-            )
+            mqtt.publish(plug["topic"], json.dumps(data))
 
         logger.debug(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)
