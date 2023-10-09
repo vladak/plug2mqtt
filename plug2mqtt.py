@@ -62,6 +62,7 @@ def parse_args():
     return parser.parse_args()
 
 
+# pylint: disable=too-many-return-statements
 def is_config_ok(plugs):
     """
     Check config for missing keys, duplicate hostnames/topics.
@@ -85,11 +86,13 @@ def is_config_ok(plugs):
             logger.error("missing topic")
             return False
 
+    # pylint: disable=consider-using-set-comprehension
     hostnames = set([plug["hostname"] for plug in plugs])
     if len(hostnames) != len(plugs):
         logger.error("duplicate hostnames in configuration")
         return False
 
+    # pylint: disable=consider-using-set-comprehension
     topics = set([plug["topic"] for plug in plugs])
     if len(topics) != len(plugs):
         logger.error("duplicate topics in configuration")
