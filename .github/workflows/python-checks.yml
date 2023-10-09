@@ -42,4 +42,5 @@ jobs:
           isort **.py  --check --diff
       - name: Run pytest
         run: |
+          pip install pytest
           pytest
