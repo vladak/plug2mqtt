@@ -191,7 +191,7 @@ def main():
             logger.debug(f"Payload: {payload}")
             mqtt.publish(plug["topic"], json.dumps(payload))
 
-        logger.debug(f"Sleeping for {args.sleep} seconds")
+        logger.info(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)
 
 
