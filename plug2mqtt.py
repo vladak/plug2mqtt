@@ -7,17 +7,17 @@ Gather state of P110 plugs specified in configuration file
 and publish it to MQTT topics.
 """
 
-import json
 import argparse
+import json
 import logging
 import os
-import sys
-import ssl
 import socket
+import ssl
+import sys
 import time
 
-from PyP100 import PyP110
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
+from PyP100 import PyP110
 
 from logutil import LogLevelAction, get_log_level
 
@@ -62,11 +62,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def config_check(plugs):
+def is_config_ok(plugs):
     """
-    check config for missing keys, duplicate hostnames/topics
+    Check config for missing keys, duplicate hostnames/topics.
 
-    Will exit the program on error.
+    Return True on success, False on failure.
     """
     logger = logging.getLogger(__name__)
 
@@ -74,26 +74,28 @@ def config_check(plugs):
     for plug in plugs:
         if not plug.get("hostname"):
             logger.error("missing hostname")
-            sys.exit(1)
+            return False
         if not plug.get("username"):
             logger.error("missing username")
-            sys.exit(1)
+            return False
         if not plug.get("password"):
             logger.error("missing password")
-            sys.exit(1)
+            return False
         if not plug.get("topic"):
             logger.error("missing topic")
-            sys.exit(1)
+            return False
 
-    hostnames = (plug["hostname"] for plug in plugs)
-    if len(list(hostnames)) != len(plugs):
+    hostnames = set([plug["hostname"] for plug in plugs])
+    if len(hostnames) != len(plugs):
         logger.error("duplicate hostnames in configuration")
-        sys.exit(1)
+        return False
 
-    topics = (plug["topic"] for plug in plugs)
-    if len(list(topics)) != len(plugs):
+    topics = set([plug["topic"] for plug in plugs])
+    if len(topics) != len(plugs):
         logger.error("duplicate topics in configuration")
-        sys.exit(1)
+        return False
+
+    return True
 
 
 def main():
@@ -117,13 +119,15 @@ def main():
     with open(args.config, encoding="UTF-8") as config_fp:
         try:
             plugs = json.load(config_fp)
-            # The output of this statement will contain passwords, so leave it out:
+            # The output of this statement will contain passwords,
+            # so leave it out:
             # logger.debug(f"{plugs}")
         except json.decoder.JSONDecodeError as e:
             logger.error(f"failed to load config: {e}")
             sys.exit(1)
 
-    config_check(plugs)
+    if not is_config_ok(plugs):
+        sys.exit(1)
 
     # connect to MQTT broker
     mqtt = MQTT.MQTT(
@@ -162,9 +166,10 @@ def main():
 
             # send the data to MQTT broker
             logger.info("Publishing to MQTT broker")
-            mqtt.publish(plug["topic"],
-                         json.dumps({"on": device_on,
-                                     "current_power": current_power / 1000}))
+            mqtt.publish(
+                plug["topic"],
+                json.dumps({"on": device_on, "current_power": current_power / 1000}),
+            )
 
         logger.debug(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)
