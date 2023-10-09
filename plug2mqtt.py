@@ -87,6 +87,10 @@ def is_config_ok(plugs):
             logger.error("missing topic")
             return False
 
+        if plug.get("data") and not isinstance(plug["data"], dict):
+            logger.error("data has to be a dictionary")
+            return False
+
     # pylint: disable=consider-using-set-comprehension
     hostnames = set([plug["hostname"] for plug in plugs])
     if len(hostnames) != len(plugs):
@@ -102,6 +106,7 @@ def is_config_ok(plugs):
     return True
 
 
+# pylint: disable=too-many-statements,too-many-locals
 def main():
     """
     Main loop. Acquire state from all plugs, publish it to MQTT, sleep, repeat.
@@ -174,13 +179,17 @@ def main():
                 logger.error(f"Cannot get device state: {e}")
                 continue
 
-            data = {"on": device_on, "current_power": current_power / 1000}
+            payload = {"on": device_on, "current_power": current_power / 1000}
             if nickname:
-                data["nickname"] = base64.b64decode(nickname).decode("utf-8")
+                payload["nickname"] = base64.b64decode(nickname).decode("utf-8")
+
+            if plug.get("data"):
+                payload.update(plug["data"])
 
             # send the data to MQTT broker
             logger.info("Publishing to MQTT broker")
-            mqtt.publish(plug["topic"], json.dumps(data))
+            logger.debug(f"Payload: {payload}")
+            mqtt.publish(plug["topic"], json.dumps(payload))
 
         logger.debug(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)

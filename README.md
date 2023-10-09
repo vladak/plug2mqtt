@@ -43,3 +43,17 @@ The `plugs.json` configuration file should look like this:
   },
 ]
 ```
+
+Opionally, the config can be extended with abitrary dictionary, like so:
+
+```json
+[
+  {
+    "topic": "devices/plug/kitchen",
+    "username": "foo@bar",
+    "password": "Changeme",
+    "hostname": "foo.iot",
+    "data": {"foo", "bar"}
+  }
+]
+```

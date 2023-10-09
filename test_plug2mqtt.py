@@ -48,3 +48,27 @@ def test_config_check_missing_hostname():
     """
     plugs = [{"username": "foo", "password": "changeme", "topic": "foo/bar"}]
     assert not is_config_ok(plugs)
+
+
+def test_config_check_missing_topic():
+    """
+    Test missing topic detection.
+    """
+    plugs = [{"username": "foo", "password": "changeme", "hostname": "foo"}]
+    assert not is_config_ok(plugs)
+
+
+def test_config_check_data_not_dict():
+    """
+    Test missing topic detection.
+    """
+    plugs = [
+        {
+            "username": "foo",
+            "password": "changeme",
+            "hostname": "foo",
+            "topic": "xxx",
+            "data": ["foo", "bar"],
+        }
+    ]
+    assert not is_config_ok(plugs)
