@@ -29,7 +29,7 @@ def parse_args():
     :return: arguments
     """
     parser = argparse.ArgumentParser(
-        description="trun on/off a socket based on temperature difference",
+        description="publish P110 plug state to MQTT",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
