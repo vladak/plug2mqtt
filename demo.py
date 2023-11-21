@@ -142,6 +142,21 @@ def message(client, topic, message):
                 device.last_time = time.monotonic()
 
 
+def get_device_state(device_info, args):
+    """
+    return device state based on power consumption
+    """
+    state = "N/A"
+    # if not updated for X seconds, consider the state as unknown.
+    if time.monotonic() - device_info.last_time < args.timeout:
+        if device_info.power > args.threshold:
+            state = "on"
+        else:
+            state = "off"
+
+    return state
+
+
 # pylint: disable=too-many-statements,too-many-locals
 def main():
     """
@@ -182,14 +197,7 @@ def main():
 
         for device_name, device_info in devices.items():
             logger.debug(f"{device_info}")
-            state = "N/A"
-            # if not updated for X seconds, consider the state as unknown.
-            if time.monotonic() - device_info.last_time < args.timeout:
-                if device_info.power > args.threshold:
-                    state = "on"
-                else:
-                    state = "off"
-            logger.info(f"{device_name} = {state}")
+            logger.info(f"{device_name} = {get_device_state(device_info, args)}")
 
 
 if __name__ == "__main__":
