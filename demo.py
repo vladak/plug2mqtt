@@ -16,10 +16,15 @@ import time
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 
-from logutil import LogLevelAction, get_log_level
+from logutil import LogLevelAction
 
 
+# pylint: disable=too-few-public-methods
 class Device:
+    """
+    represents a plug device
+    """
+
     def __init__(self, name, power, last_time):
         self.name = name
         self.power = power
@@ -73,7 +78,8 @@ def parse_args():
     )
     parser.add_argument(
         "--timeout",
-        help="if device state was last read earlier than this, consider the state unknown, in seconds",
+        help="if device state was last read earlier than this, "
+        "consider the state unknown, in seconds",
         default=60,
         type=int,
     )
@@ -83,17 +89,26 @@ def parse_args():
 
 # pylint: disable=unused-argument, redefined-outer-name
 def connect(mqtt_client, userdata, flags, rc):
+    """
+    connect callback
+    """
     logger = logging.getLogger(__name__)
     logger.debug("Connected to MQTT Broker!")
-    logger.debug("Flags: {0}\n RC: {1}".format(flags, rc))
+    logger.debug(f"Flags: {flags}\n RC: {rc}")
 
 
 def subscribe(mqtt_client, userdata, topic, granted_qos):
+    """
+    subscribe callback
+    """
     logger = logging.getLogger(__name__)
-    logger.debug("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
+    logger.debug(f"Subscribed to {topic} with QOS level {granted_qos}")
 
 
 def message(client, topic, message):
+    """
+    received message callback
+    """
     logger = logging.getLogger(__name__)
     logger.debug(f"New message on topic {topic}: {message}")
 
@@ -113,10 +128,11 @@ def message(client, topic, message):
             d = json.loads(message)
             power = d.get("current_power")
         except json.decoder.JSONDecodeError as e:
-            logger.error(f"cannot parse JSON", e)
+            logger.error(f"cannot parse JSON: {e}")
             return
 
         if power:
+            # pylint: disable=protected-access
             devices = client._user_data
             if not devices.get(device_name):
                 devices[device_name] = Device(device_name, power, time.monotonic())
