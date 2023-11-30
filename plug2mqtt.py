@@ -8,7 +8,7 @@ and publish it to MQTT topics.
 """
 
 import argparse
-import base64
+import asyncio
 import json
 import logging
 import os
@@ -18,7 +18,8 @@ import sys
 import time
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
-from PyP100 import PyP110
+# pylint: disable=no-name-in-module
+from tapo import ApiClient
 
 from logutil import LogLevelAction, get_log_level
 
@@ -107,7 +108,7 @@ def is_config_ok(plugs):
 
 
 # pylint: disable=too-many-statements,too-many-locals
-def main():
+async def main():
     """
     Main loop. Acquire state from all plugs, publish it to MQTT, sleep, repeat.
     """
@@ -156,24 +157,27 @@ def main():
             hostname = plug["hostname"]
             logger.info(f"Connecting to the plug on {hostname}")
             try:
-                p110 = PyP110.P110(hostname, plug["username"], plug["password"])
-                p110.handshake()
-                p110.login()
-                logger.info("Connected to the plug")
+                client = ApiClient(plug["username"], plug["password"])
+                p110 = await client.p110(hostname)
+                logger.info(f"Connected to the plug on {hostname}")
 
-                logger.debug(f"device info: {p110.getDeviceInfo()}")
-                result = p110.getDeviceInfo()["result"]
-                device_on = result["device_on"]
+                logger.debug("Getting device info")
+                device_info = await p110.get_device_info()
+                logger.debug("Got device info")
+                device_info_dict = device_info.to_dict()
+                logger.debug(f"device info: {device_info_dict}")
+                device_on = device_info_dict["device_on"]
                 logger.debug(f"device_on = {device_on}")
 
                 try:
-                    nickname = result["nickname"]
+                    nickname = device_info_dict["nickname"]
                 except KeyError:
                     nickname = None
 
-                energy_usage_dict = p110.getEnergyUsage()
+                energy_usage = await p110.get_energy_usage()
+                energy_usage_dict = energy_usage.to_dict()
                 logger.debug(f"Got energy usage dictionary: {energy_usage_dict}")
-                current_power = energy_usage_dict.get("result").get("current_power")
+                current_power = energy_usage_dict.get("current_power")
             # pylint: disable=broad-exception-caught
             except Exception as e:
                 logger.error(f"Cannot get device state: {e}")
@@ -181,7 +185,7 @@ def main():
 
             payload = {"on": device_on, "current_power": current_power / 1000}
             if nickname:
-                payload["nickname"] = base64.b64decode(nickname).decode("utf-8")
+                payload["nickname"] = nickname
 
             if plug.get("data"):
                 payload.update(plug["data"])
@@ -197,6 +201,6 @@ def main():
 
 if __name__ == "__main__":
     try:
-        main()
+        asyncio.run(main())
     except KeyboardInterrupt:
         sys.exit(0)
