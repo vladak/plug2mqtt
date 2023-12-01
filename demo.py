@@ -115,7 +115,7 @@ def message(client, topic, message):
     device_name = None
     try:
         idx = topic.rindex("/")
-        device_name = topic[idx + 1 :]
+        device_name = topic[idx + 1:]
     except ValueError as e:
         logger.error(f"not a valid topic: {topic}", e)
 
