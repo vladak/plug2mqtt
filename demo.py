@@ -25,13 +25,20 @@ class Device:
     represents a plug device
     """
 
-    def __init__(self, name, power, last_time):
+    def __init__(self, name, power):
         self.name = name
         self.power = power
-        self.last_time = last_time
+        self.last_time = time.monotonic()
 
     def __str__(self):
         return f"{self.name}: {self.power} {self.last_time}"
+
+    def update(self, power):
+        """
+        update last power state.
+        """
+        self.last_time = time.monotonic()
+        self.power = power
 
 
 def parse_args():
@@ -128,15 +135,14 @@ def message(client, topic, message):
             return
 
         if power:
+            logger.debug(f"updating {device_name} with {power}")
             # The "on_message" callback does not get user data directly like other callbacks,
             # so one has to use the MQTT object.
             devices = client.user_data
             if not devices.get(device_name):
-                devices[device_name] = Device(device_name, power, time.monotonic())
+                devices[device_name] = Device(device_name, power)
             else:
-                device = devices[device_name]
-                device.power = power
-                device.last_time = time.monotonic()
+                devices[device_name].update(power)
 
 
 def get_device_state(device_info, args):
@@ -157,7 +163,7 @@ def get_device_state(device_info, args):
 # pylint: disable=too-many-statements,too-many-locals
 def main():
     """
-    Main loop. Acquire state from all plugs, publish it to MQTT, sleep, repeat.
+    Main loop. Acquire state from plugs using MQTT.
     """
     args = parse_args()
 
