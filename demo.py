@@ -161,7 +161,6 @@ def get_device_state(device_info, args):
     return state
 
 
-# pylint: disable=too-many-statements,too-many-locals
 def main():
     """
     Main loop. Acquire state from plugs using MQTT and use a threshold to determine
@@ -176,22 +175,7 @@ def main():
     # map of device name to Devices instance
     devices = {}
 
-    # connect to MQTT broker
-    mqtt = MQTT.MQTT(
-        broker=args.hostname,
-        port=args.port,
-        socket_pool=socket,
-        ssl_context=ssl.create_default_context(),
-        user_data=devices,
-    )
-
-    mqtt.on_connect = connect
-    mqtt.on_subscribe = subscribe
-    mqtt.on_message = message
-
-    logger.info(f"Connecting to MQTT broker {args.hostname} on port {args.port}")
-    mqtt.connect()
-    mqtt.subscribe(args.topic, qos=0)
+    mqtt = mqtt_setup(args, devices)
 
     i = 0
     while True:
@@ -203,6 +187,31 @@ def main():
         for device_name, device_info in devices.items():
             logger.debug(f"{device_info}")
             logger.info(f"{device_name} = {get_device_state(device_info, args)}")
+
+
+def mqtt_setup(args, devices):
+    """
+    connect to MQTT broker and subscribe to topic given by the args
+    """
+    logger = logging.getLogger(__name__)
+
+    mqtt = MQTT.MQTT(
+        broker=args.hostname,
+        port=args.port,
+        socket_pool=socket,
+        ssl_context=ssl.create_default_context(),
+        user_data=devices,
+    )
+    mqtt.on_connect = connect
+    mqtt.on_subscribe = subscribe
+    mqtt.on_message = message
+
+    logger.info(f"Connecting to MQTT broker {args.hostname} on port {args.port}")
+    mqtt.connect()
+
+    mqtt.subscribe(args.topic, qos=0)
+
+    return mqtt
 
 
 if __name__ == "__main__":
