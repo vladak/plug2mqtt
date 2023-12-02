@@ -120,10 +120,6 @@ def message(client, topic, message):
         logger.error(f"not a valid topic: {topic}", e)
 
     if device_name:
-        # Unfortunately the "on_message" callback does not allow to pass user data
-        # (https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/issues/178),
-        # so one has to use a workaround.
-        power = None
         try:
             d = json.loads(message)
             power = d.get("current_power")
@@ -132,8 +128,9 @@ def message(client, topic, message):
             return
 
         if power:
-            # pylint: disable=protected-access
-            devices = client._user_data
+            # The "on_message" callback does not get user data directly like other callbacks,
+            # so one has to use the MQTT object.
+            devices = client.user_data
             if not devices.get(device_name):
                 devices[device_name] = Device(device_name, power, time.monotonic())
             else:
