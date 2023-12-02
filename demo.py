@@ -7,8 +7,8 @@ Gather state of P110 plugs from MQTT.
 """
 
 import argparse
-import logging
 import json
+import logging
 import socket
 import ssl
 import sys
