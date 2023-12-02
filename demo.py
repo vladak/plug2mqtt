@@ -129,12 +129,13 @@ def message(client, topic, message):
     if device_name:
         try:
             d = json.loads(message)
-            power = d.get("current_power")
+            on = d.get("on")
         except json.decoder.JSONDecodeError as e:
             logger.error(f"cannot parse JSON: {e}")
             return
 
-        if power:
+        if on:
+            power = d.get("current_power")
             logger.debug(f"updating {device_name} with {power}")
             # The "on_message" callback does not get user data directly like other callbacks,
             # so one has to use the MQTT object.
@@ -163,7 +164,8 @@ def get_device_state(device_info, args):
 # pylint: disable=too-many-statements,too-many-locals
 def main():
     """
-    Main loop. Acquire state from plugs using MQTT.
+    Main loop. Acquire state from plugs using MQTT and use a threshold to determine
+    if the plugged device is on or off.
     """
     args = parse_args()
 
