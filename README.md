@@ -24,6 +24,23 @@ Publish smart plug state to MQTT. Specifically and currently this works for P110
   systemctl status plug2mqtt
 ```
 
+## Prometheus
+
+If the metrics published are to be available in Prometheus, the MQTT exporter configuration
+in `/etc/prometheus/mqtt-exporter.yaml` needs to be augmented with:
+```yaml
+matrics:
+  -
+    # The name of the metric in prometheus
+    prom_name: power
+    # The name of the metric in a MQTT JSON message
+    mqtt_name: current_power
+    # The prometheus help text for this metric
+    help: power in Watts
+    # The prometheus type for this metric. Valid values are: "gauge" and "counter"
+    type: gauge
+```
+
 ## Setup
 
 The `plugs.json` configuration file should look like this:
