@@ -1,6 +1,7 @@
 """
 Test plug2mqtt
 """
+
 import copy
 from pprint import pprint
 
