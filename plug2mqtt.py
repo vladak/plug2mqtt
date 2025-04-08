@@ -209,9 +209,10 @@ async def main():
                     payload.update(plug["data"])
 
                 # send the data to MQTT broker
-                logger.info("Publishing to MQTT broker")
+                topic = plug["topic"]
+                logger.info(f"Publishing to MQTT topic {topic}")
                 logger.debug(f"Payload: {payload}")
-                mqtt.publish(plug["topic"], json.dumps(payload))
+                mqtt.publish(topic, json.dumps(payload))
         except MMQTTException as e:
             logger.warning(f"Got MQTT exception: {e}")
             mqtt.reconnect()
