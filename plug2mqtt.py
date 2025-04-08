@@ -18,6 +18,7 @@ import sys
 import time
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
+from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
 
 # pylint: disable=no-name-in-module
 from tapo import ApiClient
@@ -166,50 +167,54 @@ async def main():
     mqtt.connect()
 
     while True:
-        # Make sure to stay connected to the broker e.g. in case of keep alive.
-        mqtt.loop(1)
+        try:
+            # Make sure to stay connected to the broker e.g. in case of keep alive.
+            mqtt.loop(1)
 
-        for plug in plugs:
-            hostname = plug["hostname"]
-            logger.info(f"Connecting to the plug on {hostname}")
-            try:
-                client = ApiClient(plug["username"], plug["password"])
-                p110 = await client.p110(hostname)
-                logger.info(f"Connected to the plug on {hostname}")
-
-                logger.debug("Getting device info")
-                device_info = await p110.get_device_info()
-                logger.debug("Got device info")
-                device_info_dict = device_info.to_dict()
-                logger.debug(f"device info: {device_info_dict}")
-                device_on = device_info_dict["device_on"]
-                logger.debug(f"device_on = {device_on}")
-
+            for plug in plugs:
+                hostname = plug["hostname"]
+                logger.info(f"Connecting to the plug on {hostname}")
                 try:
-                    nickname = device_info_dict["nickname"]
-                except KeyError:
-                    nickname = None
+                    client = ApiClient(plug["username"], plug["password"])
+                    p110 = await client.p110(hostname)
+                    logger.info(f"Connected to the plug on {hostname}")
 
-                energy_usage = await p110.get_energy_usage()
-                energy_usage_dict = energy_usage.to_dict()
-                logger.debug(f"Got energy usage dictionary: {energy_usage_dict}")
-                current_power = energy_usage_dict.get("current_power")
-            # pylint: disable=broad-exception-caught
-            except Exception as e:
-                logger.error(f"Cannot get device state: {e}")
-                continue
+                    logger.debug("Getting device info")
+                    device_info = await p110.get_device_info()
+                    logger.debug("Got device info")
+                    device_info_dict = device_info.to_dict()
+                    logger.debug(f"device info: {device_info_dict}")
+                    device_on = device_info_dict["device_on"]
+                    logger.debug(f"device_on = {device_on}")
 
-            payload = {ON: device_on, CURRENT_POWER: current_power / 1000}
-            if nickname:
-                payload[NICKNAME] = nickname
+                    try:
+                        nickname = device_info_dict["nickname"]
+                    except KeyError:
+                        nickname = None
 
-            if plug.get("data"):
-                payload.update(plug["data"])
+                    energy_usage = await p110.get_energy_usage()
+                    energy_usage_dict = energy_usage.to_dict()
+                    logger.debug(f"Got energy usage dictionary: {energy_usage_dict}")
+                    current_power = energy_usage_dict.get("current_power")
+                # pylint: disable=broad-exception-caught
+                except Exception as e:
+                    logger.error(f"Cannot get device state: {e}")
+                    continue
 
-            # send the data to MQTT broker
-            logger.info("Publishing to MQTT broker")
-            logger.debug(f"Payload: {payload}")
-            mqtt.publish(plug["topic"], json.dumps(payload))
+                payload = {ON: device_on, CURRENT_POWER: current_power / 1000}
+                if nickname:
+                    payload[NICKNAME] = nickname
+
+                if plug.get("data"):
+                    payload.update(plug["data"])
+
+                # send the data to MQTT broker
+                logger.info("Publishing to MQTT broker")
+                logger.debug(f"Payload: {payload}")
+                mqtt.publish(plug["topic"], json.dumps(payload))
+        except MMQTTException as e:
+            logger.warning(f"Got MQTT exception: {e}")
+            mqtt.reconnect()
 
         logger.info(f"Sleeping for {args.sleep} seconds")
         time.sleep(args.sleep)
