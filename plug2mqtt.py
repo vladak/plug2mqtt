@@ -28,6 +28,8 @@ from logutil import LogLevelAction, get_log_level
 ON = "on"
 CURRENT_POWER = "current_power"
 NICKNAME = "nickname"
+TODAY_ENERGY = "today_energy"
+TODAY_RUNTIME = "today_runtime"
 
 
 def parse_args():
@@ -106,6 +108,14 @@ def is_config_ok(plugs):
 
             if plug_data.get(CURRENT_POWER):
                 logger.error(f"data contains reserved key: {CURRENT_POWER}")
+                return False
+
+            if plug_data.get(TODAY_ENERGY):
+                logger.error(f"data contains reserved key: {TODAY_ENERGY}")
+                return False
+
+            if plug_data.get(TODAY_RUNTIME):
+                logger.error(f"data contains reserved key: {TODAY_RUNTIME}")
                 return False
 
     # pylint: disable=consider-using-set-comprehension
@@ -200,7 +210,12 @@ async def main():
                     logger.error(f"Cannot get device state: {e}")
                     continue
 
-                payload = {ON: device_on, CURRENT_POWER: current_power / 1000}
+                payload = {
+                    ON: device_on,
+                    CURRENT_POWER: current_power / 1000,
+                    TODAY_ENERGY: energy_usage_dict.get("today_energy"),
+                    TODAY_RUNTIME: energy_usage_dict.get("today_runtime"),
+                }
                 if nickname:
                     payload[NICKNAME] = nickname
 
