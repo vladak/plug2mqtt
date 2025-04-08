@@ -25,7 +25,6 @@ from tapo import ApiClient
 
 from logutil import LogLevelAction, get_log_level
 
-
 ON = "on"
 CURRENT_POWER = "current_power"
 NICKNAME = "nickname"
