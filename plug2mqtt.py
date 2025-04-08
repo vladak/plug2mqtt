@@ -15,7 +15,6 @@ import os
 import socket
 import ssl
 import sys
-import time
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
@@ -244,7 +243,7 @@ async def main():
             mqtt.reconnect()
 
         logger.info(f"Sleeping for {args.sleep} seconds")
-        time.sleep(args.sleep)
+        await asyncio.sleep(args.sleep)
 
 
 if __name__ == "__main__":
