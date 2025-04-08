@@ -25,6 +25,10 @@ from tapo import ApiClient
 from logutil import LogLevelAction, get_log_level
 
 
+ON = "on"
+CURRENT_POWER = "current_power"
+
+
 def parse_args():
     """
     Parse command line arguments
@@ -89,9 +93,19 @@ def is_config_ok(plugs):
             logger.error("missing topic")
             return False
 
-        if plug.get("data") and not isinstance(plug["data"], dict):
-            logger.error("data has to be a dictionary")
-            return False
+        plug_data = plug.get("data")
+        if plug_data:
+            if not isinstance(plug_data, dict):
+                logger.error("data has to be a dictionary")
+                return False
+
+            if plug_data.get(ON):
+                logger.error(f"data contains reserved key: {ON}")
+                return False
+
+            if plug_data.get(CURRENT_POWER):
+                logger.error(f"data contains reserved key: {CURRENT_POWER}")
+                return False
 
     # pylint: disable=consider-using-set-comprehension
     hostnames = set([plug["hostname"] for plug in plugs])
@@ -184,7 +198,7 @@ async def main():
                 logger.error(f"Cannot get device state: {e}")
                 continue
 
-            payload = {"on": device_on, "current_power": current_power / 1000}
+            payload = {ON: device_on, CURRENT_POWER: current_power / 1000}
             if nickname:
                 payload["nickname"] = nickname
 

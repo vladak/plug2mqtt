@@ -5,7 +5,9 @@ Test plug2mqtt
 import copy
 from pprint import pprint
 
-from plug2mqtt import is_config_ok
+import pytest
+
+from plug2mqtt import CURRENT_POWER, ON, is_config_ok
 
 PLUGS_BASE_CONFIG = [
     {
@@ -70,6 +72,23 @@ def test_config_check_data_not_dict():
             "hostname": "foo",
             "topic": "xxx",
             "data": ["foo", "bar"],
+        }
+    ]
+    assert not is_config_ok(plugs)
+
+
+@pytest.mark.parametrize("key", [ON, CURRENT_POWER])
+def test_config_check_data_reserved_key(key):
+    """
+    Test reserved key detection.
+    """
+    plugs = [
+        {
+            "username": "foo",
+            "password": "changeme",
+            "hostname": "foo",
+            "topic": "xxx",
+            "data": {key, "huh"},
         }
     ]
     assert not is_config_ok(plugs)
