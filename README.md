@@ -39,6 +39,15 @@ matrics:
     help: power in Watts
     # The prometheus type for this metric. Valid values are: "gauge" and "counter"
     type: gauge
+  -
+    # The name of the metric in prometheus
+    prom_name: today_energy
+    # The name of the metric in a MQTT JSON message
+    mqtt_name: today_energy
+    # The prometheus help text for this metric
+    help: energy for one day in Wh
+    # The prometheus type for this metric. Valid values are: "gauge" and "counter"
+    type: counter
 ```
 
 ## Setup
