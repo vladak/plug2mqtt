@@ -27,6 +27,7 @@ from logutil import LogLevelAction, get_log_level
 
 ON = "on"
 CURRENT_POWER = "current_power"
+NICKNAME = "nickname"
 
 
 def parse_args():
@@ -200,7 +201,7 @@ async def main():
 
             payload = {ON: device_on, CURRENT_POWER: current_power / 1000}
             if nickname:
-                payload["nickname"] = nickname
+                payload[NICKNAME] = nickname
 
             if plug.get("data"):
                 payload.update(plug["data"])
