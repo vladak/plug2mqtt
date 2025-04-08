@@ -72,6 +72,31 @@ def parse_args():
     return parser.parse_args()
 
 
+def has_reserved_keys(plug_data):
+    """
+    Check whether the dictionary has any reserved key.
+    """
+    logger = logging.getLogger(__name__)
+
+    if plug_data.get(ON):
+        logger.error(f"data contains reserved key: {ON}")
+        return True
+
+    if plug_data.get(CURRENT_POWER):
+        logger.error(f"data contains reserved key: {CURRENT_POWER}")
+        return True
+
+    if plug_data.get(TODAY_ENERGY):
+        logger.error(f"data contains reserved key: {TODAY_ENERGY}")
+        return True
+
+    if plug_data.get(TODAY_RUNTIME):
+        logger.error(f"data contains reserved key: {TODAY_RUNTIME}")
+        return True
+
+    return False
+
+
 # pylint: disable=too-many-return-statements
 def is_config_ok(plugs):
     """
@@ -102,20 +127,7 @@ def is_config_ok(plugs):
                 logger.error("data has to be a dictionary")
                 return False
 
-            if plug_data.get(ON):
-                logger.error(f"data contains reserved key: {ON}")
-                return False
-
-            if plug_data.get(CURRENT_POWER):
-                logger.error(f"data contains reserved key: {CURRENT_POWER}")
-                return False
-
-            if plug_data.get(TODAY_ENERGY):
-                logger.error(f"data contains reserved key: {TODAY_ENERGY}")
-                return False
-
-            if plug_data.get(TODAY_RUNTIME):
-                logger.error(f"data contains reserved key: {TODAY_RUNTIME}")
+            if has_reserved_keys(plug_data):
                 return False
 
     # pylint: disable=consider-using-set-comprehension
