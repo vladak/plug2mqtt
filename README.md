@@ -1,6 +1,6 @@
 # plug2mqtt
 
-Publish smart plug state to MQTT. Specifically and currently this works for P110 only.
+Publish smart plug state to MQTT. Specifically and currently this works with Tapo P110 only.
 
 ## Install
 
@@ -61,7 +61,7 @@ The `plugs.json` configuration file should look like this:
 ]
 ```
 
-Opionally, the config can be extended with abitrary dictionary, like so:
+Opionally, the config can be extended with abitrary dictionary (as long as it does not contain reserved keys: `on` or `current_power`), like so:
 
 ```json
 [
