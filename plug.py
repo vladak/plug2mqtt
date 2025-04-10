@@ -62,8 +62,6 @@ class Plug:
         if self._p110 is None:
             self.logger.error(f"Not connected to plug {self.hostname}, reconnecting")
             await self.connect()
-            if self._p110 is None:
-                return None, None
 
         self.logger.debug("Getting device info")
         device_info = await self._p110.get_device_info()
