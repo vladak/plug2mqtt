@@ -20,7 +20,7 @@ import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
 
 from config import (
-    is_config_ok,
+    check_config,
     parse_args,
 )
 from logutil import get_log_level
@@ -56,8 +56,7 @@ async def main():
             logger.error(f"failed to load config: {e}")
             sys.exit(1)
 
-    if not is_config_ok(plugs_config):
-        sys.exit(1)
+    check_config(plugs_config)
 
     # connect to MQTT broker
     mqtt = MQTT.MQTT(

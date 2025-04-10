@@ -54,74 +54,54 @@ def parse_args():
     return parser.parse_args()
 
 
-def has_reserved_keys(plug_data):
+def check_reserved_keys(plug_data):
     """
     Check whether the dictionary has any reserved key.
     """
-    logger = logging.getLogger(__name__)
-
     if plug_data.get(ON):
-        logger.error(f"data contains reserved key: {ON}")
-        return True
+        raise ValueError(f"data contains reserved key: {ON}")
 
     if plug_data.get(CURRENT_POWER):
-        logger.error(f"data contains reserved key: {CURRENT_POWER}")
-        return True
+        raise ValueError(f"data contains reserved key: {CURRENT_POWER}")
 
     if plug_data.get(TODAY_ENERGY):
-        logger.error(f"data contains reserved key: {TODAY_ENERGY}")
-        return True
+        raise ValueError(f"data contains reserved key: {TODAY_ENERGY}")
 
     if plug_data.get(TODAY_RUNTIME):
-        logger.error(f"data contains reserved key: {TODAY_RUNTIME}")
-        return True
-
-    return False
+        raise ValueError(f"data contains reserved key: {TODAY_RUNTIME}")
 
 
 # pylint: disable=too-many-return-statements
-def is_config_ok(plugs):
+def check_config(plugs):
     """
     Check config for missing keys, duplicate hostnames/topics.
-
-    Return True on success, False on failure.
     """
     logger = logging.getLogger(__name__)
 
     logger.info("Checking configuration")
     for plug in plugs:
         if not plug.get("hostname"):
-            logger.error("missing hostname")
-            return False
+            raise ValueError("missing hostname")
         if not plug.get("username"):
-            logger.error("missing username")
-            return False
+            raise ValueError("missing username")
         if not plug.get("password"):
-            logger.error("missing password")
-            return False
+            raise ValueError("missing password")
         if not plug.get("topic"):
-            logger.error("missing topic")
-            return False
+            raise ValueError("missing topic")
 
         plug_data = plug.get("data")
         if plug_data:
             if not isinstance(plug_data, dict):
-                logger.error("data has to be a dictionary")
-                return False
+                raise ValueError("data has to be a dictionary")
 
-            if has_reserved_keys(plug_data):
-                return False
+            check_reserved_keys(plug_data)
 
     # pylint: disable=consider-using-set-comprehension
     hostnames = set([plug["hostname"] for plug in plugs])
     if len(hostnames) != len(plugs):
-        logger.error("duplicate hostnames in configuration")
-        return False
+        raise ValueError("duplicate hostnames in configuration")
 
     # pylint: disable=consider-using-set-comprehension
     topics = set([plug["topic"] for plug in plugs])
     if len(topics) != len(plugs):
-        logger.error("duplicate topics in configuration")
-        return False
-
-    return True
+        raise ValueError("duplicate topics in configuration")
