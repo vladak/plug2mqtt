@@ -83,7 +83,9 @@ async def main():
             mqtt.loop(1)
 
             before = datetime.now()
-            plug_data = await asyncio.gather(*[plug.get_device_info() for plug in plugs])
+            plug_data = await asyncio.gather(
+                *[plug.get_device_info() for plug in plugs]
+            )
             logger.debug(f"Got plug data in {datetime.now() - before}")
             for topic, payload in plug_data:
                 if payload is not None:
