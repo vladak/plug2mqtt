@@ -7,7 +7,7 @@ from pprint import pprint
 
 import pytest
 
-from plug2mqtt import (
+from config import (
     CURRENT_POWER,
     NICKNAME,
     ON,
