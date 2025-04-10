@@ -1,3 +1,7 @@
+"""
+config functions
+"""
+
 import argparse
 import logging
 
