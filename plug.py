@@ -30,15 +30,16 @@ class Plug:
         """
         hostname = self._plug_config["hostname"]
         self.logger.info(f"Connecting to the plug on {hostname}")
+
         try:
             client = ApiClient(
                 self._plug_config["username"], self._plug_config["password"]
             )
             self._p110 = await client.p110(hostname)
             self.logger.info(f"Connected to the plug on {hostname}")
-        # pylint: disable=broad-exception-caught
         except Exception as e:
-            self.logger.error(f"Cannot connect to device {self.hostname} state: {e}")
+            # pylint: disable=broad-exception-raised
+            raise Exception(f"Cannot connect to plug {self.hostname}: {e}") from e
 
     @property
     def hostname(self):
@@ -84,8 +85,8 @@ class Plug:
             current_power = energy_usage_dict.get("current_power")
         # pylint: disable=broad-exception-caught
         except Exception as e:
-            self.logger.error(f"Cannot get energy usage info: {e}")
-            return None, None
+            # pylint: disable=broad-exception-raised
+            raise Exception(f"Cannot get energy usage info for {self.hostname}") from e
 
         payload = {
             ON: device_on,

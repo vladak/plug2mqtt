@@ -74,8 +74,15 @@ async def main():
         plug = Plug(plug_config)
         plugs.append(plug)
 
+    before = datetime.now()
     logger.debug("Connecting to the plugs")
-    await asyncio.gather(*[plug.connect() for plug in plugs])
+    res = await asyncio.gather(
+        *[plug.connect() for plug in plugs], return_exceptions=True
+    )
+    logger.debug(f"Connected to all plugs in {datetime.now() - before}")
+    for r in res:
+        if isinstance(r, Exception):
+            logger.error(r)
 
     while True:
         try:
@@ -84,14 +91,18 @@ async def main():
 
             before = datetime.now()
             plug_data = await asyncio.gather(
-                *[plug.get_device_info() for plug in plugs]
+                *[plug.get_device_info() for plug in plugs], return_exceptions=True
             )
-            logger.debug(f"Got plug data in {datetime.now() - before}")
-            for topic, payload in plug_data:
-                if payload is not None:
-                    logger.info(f"Publishing to MQTT topic {topic}")
-                    logger.debug(f"Payload: {payload}")
-                    mqtt.publish(topic, json.dumps(payload))
+            logger.debug(f"Got data from all plugs in {datetime.now() - before}")
+            for r in plug_data:
+                if isinstance(r, Exception):
+                    logger.error(r)
+                else:
+                    (topic, payload) = r
+                    if payload is not None:
+                        logger.info(f"Publishing to MQTT topic {topic}")
+                        logger.debug(f"Payload: {payload}")
+                        mqtt.publish(topic, json.dumps(payload))
         except MMQTTException as e:
             logger.warning(f"Got MQTT exception: {e}")
             mqtt.reconnect()
