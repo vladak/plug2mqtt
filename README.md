@@ -83,3 +83,8 @@ Opionally, the config can be extended with abitrary dictionary (as long as it do
   }
 ]
 ```
+
+# Links
+
+- https://github.com/mihai-dinculescu/tapo
+- https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT/
