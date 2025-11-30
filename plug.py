@@ -101,3 +101,6 @@ class Plug:
             payload.update(self._plug_config["data"])
 
         return self.topic, payload
+
+    def __str__(self):
+        return self.hostname

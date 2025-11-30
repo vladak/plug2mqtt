@@ -75,13 +75,13 @@ async def main():
 
     before = datetime.now()
     logger.info("Connecting to the plugs")
-    res = await asyncio.gather(
+    connect_results = await asyncio.gather(
         *[plug.connect() for plug in plugs], return_exceptions=True
     )
     logger.info(f"Handled connect to all plugs in {datetime.now() - before}")
-    for r in res:
-        if isinstance(r, Exception):
-            logger.error(r)
+    for idx, res in enumerate(connect_results):
+        if isinstance(res, Exception):
+            logger.error(f"{plugs[idx]}: {res}")
 
     while True:
         try:
@@ -93,9 +93,9 @@ async def main():
                 *[plug.get_device_info() for plug in plugs], return_exceptions=True
             )
             logger.info(f"Got data from all plugs in {datetime.now() - before}")
-            for r in plug_data:
+            for idx, r in enumerate(plug_data):
                 if isinstance(r, Exception):
-                    logger.error(r)
+                    logger.error(f"{plugs[idx]}: {r}")
                 else:
                     (topic, payload) = r
                     if payload is not None:
