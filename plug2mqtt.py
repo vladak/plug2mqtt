@@ -81,7 +81,7 @@ async def main():
     logger.info(f"Handled connect to all plugs in {datetime.now() - before}")
     for idx, res in enumerate(connect_results):
         if isinstance(res, Exception):
-            logger.error(f"{plugs[idx]}: {res}")
+            logger.error(f"Failed connect to {plugs[idx]}: {res}")
 
     while True:
         try:
