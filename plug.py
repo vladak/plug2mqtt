@@ -94,7 +94,7 @@ class Plug:
             TODAY_RUNTIME: energy_usage_dict.get("today_runtime"),
         }
         if current_power is not None:
-            payload[CURRENT_POWER] = current_power / 1000,
+            payload[CURRENT_POWER] = current_power / 1000
         if nickname:
             payload[NICKNAME] = nickname
 
