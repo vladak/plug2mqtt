@@ -22,7 +22,7 @@ class Plug:
         self._plug_config = plug_config
         self._p110 = None
 
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger("")
 
     async def connect(self):
         """

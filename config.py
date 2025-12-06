@@ -76,7 +76,7 @@ def check_config(plugs):
     """
     Check config for missing keys, duplicate hostnames/topics.
     """
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("")
 
     logger.info("Checking configuration")
     for plug in plugs:

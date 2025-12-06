@@ -35,7 +35,7 @@ async def main():
     args = parse_args()
 
     logging.basicConfig()
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("")
     logger.setLevel(args.loglevel)
 
     # To support relative paths.
