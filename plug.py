@@ -82,17 +82,24 @@ class Plug:
             self.logger.debug(
                 f"Got energy usage dictionary from {self.hostname}: {energy_usage_dict}"
             )
-            current_power = energy_usage_dict.get("current_power")
         # pylint: disable=broad-exception-caught
         except Exception as e:
             # pylint: disable=broad-exception-raised
             raise Exception(f"Cannot get energy usage info for {self.hostname}") from e
+
+        try:
+            current_power_res = await self._p110.get_current_power()
+            current_power_dict = current_power_res.to_dict()
+        except Exception as e:
+            # pylint: disable=broad-exception-raised
+            raise Exception(f"Cannot get current power for {self.hostname}") from e
 
         payload = {
             ON: device_on,
             TODAY_ENERGY: energy_usage_dict.get("today_energy"),
             TODAY_RUNTIME: energy_usage_dict.get("today_runtime"),
         }
+        current_power = current_power_dict.get("current_power")
         if current_power is not None:
             payload[CURRENT_POWER] = current_power / 1000
         if nickname:
